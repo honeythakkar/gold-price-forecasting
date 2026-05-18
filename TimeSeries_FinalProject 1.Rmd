@@ -1,0 +1,600 @@
+---
+title: "TimeSeries_FinalProject"
+author: "vemani venkatesh"
+date: "2024-11-22"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+Gold_Prices <- read.csv("~/Downloads/Gold  Prices 2.csv")
+View(Gold_Prices)
+```
+
+```{r}
+length(unique(Gold_Prices$Date))
+
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+
+```
+
+```{r}
+# Check for missing values in the Date column
+summary(Gold_Prices$Date)
+
+# Generate a sequence of weekdays starting from 2019-11-11, excluding weekends
+dates_seq <- seq(from = as.Date("2019-11-11"), by = "day", length.out = nrow(Gold_Prices))
+
+# Remove weekends from the sequence
+weekdays_only <- dates_seq[!weekdays(dates_seq) %in% c("Saturday", "Sunday")]
+
+# Assign the weekday sequence to the Date column
+Gold_Prices$Date <- weekdays_only[1:nrow(Gold_Prices)]
+
+# Convert the Date column to POSIXct format
+Gold_Prices$Date <- as.POSIXct(Gold_Prices$Date, format = "%Y-%m-%d", tz = "America/New_York")
+
+```
+
+
+
+
+```{r}
+
+sum(is.na(Gold_Prices))
+
+colSums(is.na(Gold_Prices))
+
+```
+
+```{r}
+# Load necessary library
+library(lubridate)
+
+# Define the start date and calculate a range of weekdays
+start_date <- as.Date("2023-04-22")  # Adjust based on your dataset's start date
+end_date <- start_date + years(5) - 1  # Create a 5-year range
+all_dates <- seq(from = start_date, to = end_date, by = "day")
+weekdays_only <- all_dates[!weekdays(all_dates) %in% c("Saturday", "Sunday")]
+
+# Check for NA values in the Date column
+missing_count <- sum(is.na(Gold_Prices$Date))  # Count missing dates
+
+# Fill NA values in the Date column with weekdays-only dates
+Gold_Prices$Date[is.na(Gold_Prices$Date)] <- weekdays_only[1:missing_count]
+
+# Print the updated dataset
+print(Gold_Prices)
+
+
+```
+## Open price over time vs date year and close price over time vs date year.
+```{r}
+
+# Load necessary libraries
+library(ggplot2)
+library(gridExtra)
+
+# Assuming your data frame is named df and has columns Open, Close, High, Low, and a Date column
+
+# Create individual plots
+p1 <- ggplot(Gold_Prices, aes(x = Date, y = Open)) +
+  geom_line(color = "green") +
+  labs(title = "Open Price Over Time", y = "Price") +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(), plot.margin = margin(10, 10, 0, 10))
+
+p2 <- ggplot(Gold_Prices, aes(x = Date, y = Close)) +
+  geom_line(color = "blue") +
+  labs(title = "Close Price Over Time", y = "Price") +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(), plot.margin = margin(10, 10, 0, 10))
+
+p3 <- ggplot(Gold_Prices, aes(x = Date, y = High)) +
+  geom_line(color = "red") +
+  labs(title = "High Price Over Time", y = "Price") +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(), plot.margin = margin(10, 10, 0, 10))
+p4 <- ggplot(Gold_Prices, aes(x = Date, y = Low)) +
+  geom_line(color = "orange") +
+  labs(title = "Low Price Over Time", x = "Date", y = "Price") +
+  theme_minimal() +
+  theme(plot.margin = margin(10, 10, 10, 25))
+
+# Arrange the plots in a single figure
+grid.arrange(p1, p2, ncol = 1)
+
+```
+# high price over time vs date year and low price over time vs date year.
+```{r}
+# Arrange the plots in a single figure
+grid.arrange(p3, p4, ncol = 1)
+
+```
+## Trading Volume overtime vs Date Year
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(lubridate)
+
+# Assuming your dataset is named Gold_Prices and it contains 'Date' and 'Volume' columns
+
+# Ensure 'Date' column is in Date format
+Gold_Prices$Date <- as.Date(Gold_Prices$Date)
+
+# Plot the trading volume over time
+ggplot(Gold_Prices, aes(x = Date, y = Volume)) +
+  geom_line(color = "black") +           # Line chart for the volume
+  theme_minimal() +                     # Use a clean theme
+  labs(title = "Trading Volume Over Time",
+       x = "Date", y = "Volume") +
+  scale_x_date(date_labels = "%Y", date_breaks = "1 year") +  # Format x-axis to show years
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") + # Add baseline
+  theme(panel.grid.major = element_line(color = "grey", size = 0.5)) # Display grid
+
+```
+
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+
+# Assuming Gold_Prices is your data frame with 'Date', 'Close', and 'Volume' columns
+# Convert 'Date' to Date type if necessary
+Gold_Prices$Date <- as.Date(Gold_Prices$Date)
+
+# Create the plot
+p <- ggplot(Gold_Prices, aes(x = Date)) +
+  # Plot the closing price on the first y-axis
+  geom_line(aes(y = Close), color = 'blue', linewidth = 1) +  
+  ylab('Price') +
+  ggtitle('Gold Prices Closing and Trading Volume Over Time') +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  
+  # Add a second y-axis for trading volume
+  geom_bar(aes(y = Volume / 1e6), stat = 'identity', fill = 'red', alpha = 0.5) +  # Rescale Volume for better visibility
+  scale_y_continuous(
+    name = 'Price',
+    sec.axis = sec_axis(~ . * 1e6, name = 'Volume')  # Scale back the volume on the secondary axis
+  ) +
+  theme(legend.position = 'top')
+
+# Display the plot
+print(p)
+
+```
+```{r}
+# Load necessary libraries
+library(ggplot2)
+
+# Assuming Gold_Prices is your data frame with 'Date', 'Close', and 'Volume' columns
+# Convert 'Date' to Date type if necessary
+Gold_Prices$Date <- as.Date(Gold_Prices$Date)
+
+# Create the plot
+p <- ggplot(Gold_Prices, aes(x = Date)) +
+  # Plot the closing price on the first y-axis
+  geom_line(aes(y = Open), color = 'blue', linewidth = 1) +  
+  ylab('Price') +
+  ggtitle('Gold Prices Opening and Trading Volume Over Time') +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  
+  # Add a second y-axis for trading volume
+  geom_bar(aes(y = Volume / 1e6), stat = 'identity', fill = 'red', alpha = 0.5) +  # Rescale Volume for better visibility
+  scale_y_continuous(
+    name = 'Price',
+    sec.axis = sec_axis(~ . * 1e6, name = 'Volume')  # Scale back the volume on the secondary axis
+  ) +
+  theme(legend.position = 'top')
+
+# Display the plot
+print(p)
+
+
+```
+# Data Preprocessing
+```{r}
+# Unique values in the 'Close' column
+unique(Gold_Prices$Dividends)
+unique(Gold_Prices$Stock.Splits)
+unique(Gold_Prices$Capital.Gains)
+```
+
+# Dropped unecessary columns
+```{r}
+
+# Drop 'Dividends' and 'Stock.Splits' columns
+Gold_Prices <- Gold_Prices[, !colnames(Gold_Prices) %in% c("Dividends", "Stock.Splits", "Capital.Gains")]
+Gold_Prices
+
+```
+
+```{r}
+str(Gold_Prices)
+
+```
+
+## Checking the Skewness
+```{r}
+# Load required library
+library(ggplot2)
+# Specify the feature columns
+feature_columns <- c("Open", "High", "Low", "Volume", "Close")
+# Plot histograms for features with normal distribution curve
+for (feature in feature_columns) {
+  print(ggplot(Gold_Prices, aes_string(x = feature)) + 
+          geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7, aes(y = ..density..)) +  # Add density to histogram
+          stat_function(fun = dnorm, args = list(mean = mean(Gold_Prices[[feature]], na.rm = TRUE), sd = sd(Gold_Prices[[feature]], na.rm = TRUE)), 
+                        color = "blue", size = 1) +  # Add normal distribution curve
+          ggtitle(paste("Distribution of", feature)) + 
+          xlab(feature) + 
+          ylab("Density"))
+}
+
+
+```
+
+
+# Scatter plots to find the relationship between features and target column
+
+```{r}
+
+# Scatter plots of features vs. target
+for (feature in feature_columns) {
+  print(ggplot(Gold_Prices, aes_string(x = feature, y = "Close")) +
+          geom_point(alpha = 0.6, color = "blue") +
+          ggtitle(paste("Relationship between", feature, "and Close")) +
+          xlab(feature) +
+          ylab("Close"))
+}
+
+
+```
+# applying log transformation
+## for Target column "Close"
+```{r}
+
+# Apply log transformation to the 'Close' column
+Gold_Prices$Log_Close <- log(Gold_Prices$Close)
+
+# Preview the dataset to confirm the transformation
+head(Gold_Prices)
+
+```
+
+```{r}
+
+# Plot original vs. log-transformed Close prices
+par(mfrow = c(1, 2))  # Arrange two plots in one row
+
+# Original Close prices
+plot(Gold_Prices$Date, Gold_Prices$Close, type = "l", col = "blue",
+     main = "Original Close Prices", xlab = "Date", ylab = "Close")
+
+# Log-transformed Close prices
+plot(Gold_Prices$Date, Gold_Prices$Log_Close, type = "l", col = "red",
+     main = "Log-Transformed Close Prices", xlab = "Date", ylab = "Log Close")
+
+
+```
+# applying log transformation
+## for Feature "Volume"
+```{r}
+
+# Apply log transformation to the 'Close' column
+Gold_Prices$Log_Volume <- log(Gold_Prices$Volume)
+
+# Preview the dataset to confirm the transformation
+head(Gold_Prices)
+
+```
+```{r}
+
+# Plot original vs. log-transformed Close prices
+par(mfrow = c(1, 2))  # Arrange two plots in one row
+
+# Original Close prices
+plot(Gold_Prices$Date, Gold_Prices$Volume, type = "l", col = "blue",
+     main = "Original Volume", xlab = "Date", ylab = "Close")
+
+# Log-transformed Close prices
+plot(Gold_Prices$Date, Gold_Prices$Log_Volume, type = "l", col = "red",
+     main = "Log-Transformed Volume ", xlab = "Date", ylab = "Log Close")
+
+
+```
+
+# checking the skewness after performing log transformation
+```{r}
+# Load required library
+library(ggplot2)
+# Define the feature columns manually
+feature_columns <- c("Open","High", "Low","Log_Close","Log_Volume")
+# Plot histograms for features with normal distribution curve
+for (feature in feature_columns) {
+  print(ggplot(Gold_Prices, aes_string(x = feature)) + 
+          geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7, aes(y = ..density..)) +  # Add density to histogram
+          stat_function(fun = dnorm, args = list(mean = mean(Gold_Prices[[feature]], na.rm = TRUE), sd = sd(Gold_Prices[[feature]], na.rm = TRUE)), 
+                        color = "blue", size = 1) +  # Add normal distribution curve
+          ggtitle(paste("Distribution of", feature)) + 
+          xlab(feature) + 
+          ylab("Density"))
+}
+
+
+```
+# checking the linearity after log transformation.
+```{r}
+
+# Scatter plots of features vs. target
+for (feature in feature_columns) {
+  print(ggplot(Gold_Prices, aes_string(x = feature, y = "Close")) +
+          geom_point(alpha = 0.6, color = "blue") +
+          ggtitle(paste("Relationship between", feature, "and Close")) +
+          xlab(feature) +
+          ylab("Close"))
+}
+
+
+```
+
+```{r}
+
+# Drop 'Dividends' and 'Stock.Splits' columns
+Gold_Prices <- Gold_Prices[, !colnames(Gold_Prices) %in% c("Close", "Volume")]
+Gold_Prices
+
+```
+# ACF and PACF
+
+```{r}
+Log_Close_ts <- ts(Gold_Prices$Log_Close, start = c(2019, 11), frequency = 252)
+
+```
+
+# plotting the time series
+```{r}
+plot(Log_Close_ts, main = "Log_Close Time Series", ylab = "Log_Close", xlab = "Time")
+
+```
+
+# verifying the start date and end date and frequency of time series data 
+```{r}
+start(Log_Close_ts)  # Should return c(2019, 11)
+end(Log_Close_ts)    # Should return the actual end date, e.g., c(2024, 5) or similar
+frequency(Log_Close_ts)  # Should match the number of observations per year (252 or 365)
+
+```
+
+# performing ACF and PACF before applying differencing to the target
+```{r}
+# ACF plot
+acf(Log_Close_ts, main = "Autocorrelation Function (ACF) of Log_Close")
+
+# PACF plot
+pacf(Log_Close_ts, main = "Partial Autocorrelation Function (PACF) of Log_Close")
+
+
+```
+# performing adf testing to check the stationarity 
+```{r}
+# Load library for ADF test
+library(tseries)
+
+# Perform ADF test
+adf.test(Log_Close_ts)
+
+```
+# performing differencing
+```{r}
+Log_Close_diff <- diff(Log_Close_ts)
+
+```
+
+# performing adf testing again after performing the log differencing
+```{r}
+adf.test(Log_Close_diff)
+
+
+```
+# replacing the Log_Close with Log_Close_diff
+```{r}
+# Assuming your dataset is named 'data'
+Gold_Prices <- Gold_Prices[-1258, ]  # Remove the first row
+
+# Now replace the 'Log_Close' column with 'Log_Close_diff'
+Gold_Prices$Log_Close <- Log_Close_diff
+
+# Verify the change
+Gold_Prices
+
+
+```
+
+# after applying differencing to the target
+
+```{r}
+Log_Close_ts1 <- ts(Gold_Prices$Log_Close, start = c(2019, 11), frequency = 252)
+```
+
+
+```{r}
+# ACF plot
+acf(Log_Close_ts1, main = "Autocorrelation Function (ACF) of Log_Close")
+
+# PACF plot
+pacf(Log_Close_ts1, main = "Partial Autocorrelation Function (PACF) of Log_Close")
+```
+# Splitting Data Train and Test Data ( 80:20)
+
+```{r}
+# Ensure Gold_Prices is your dataset and check it has data
+if (nrow(Gold_Prices) > 0) {
+  set.seed(123)  # Set seed for reproducibility
+  
+  # Calculate the size for the training set (80% of the data)
+  train_size <- floor(0.8 * nrow(Gold_Prices))
+  
+  # Create the training and test sets based on the calculated index
+  train_data <- Gold_Prices[1:train_size, ]
+  test_data <- Gold_Prices[(train_size + 1):nrow(Gold_Prices), ]
+  
+  # Display the number of rows in each set
+  cat("Training Set Size:", nrow(train_data), "\n")
+  cat("Test Set Size:", nrow(test_data), "\n")
+} else {
+  cat("Dataset 'Gold_Prices' is empty. Please check your data.")
+}
+```
+
+# Fitting ARIMA for the Training Data
+```{r}
+library(forecast)
+# Ensure train_data is the column you want to model (e.g., 'Log_Close')
+train_series <- train_data$Log_Close  # Replace 'Log_Close' with the desired column
+
+# Convert to a time series object if it's not already
+train_ts <- ts(train_series, frequency = 252)  # Use appropriate frequency for your data
+
+# Fit ARIMA(1,1,1) model on the training data
+model <- Arima(train_ts, order = c(1, 1, 1))
+
+# Summarize the model
+summary(model)
+
+
+```
+
+# checking for d =2
+```{r}
+# Ensure train_data is the column you want to model (e.g., 'Log_Close')
+train_series <- train_data$Log_Close  # Replace 'Log_Close' with the desired column
+
+# Convert to a time series object if it's not already
+train_ts <- ts(train_series, frequency = 252)  # Use appropriate frequency for your data
+
+# Fit ARIMA(1,1,1) model on the training data
+model2 <- Arima(train_ts, order = c(1, 2, 1))
+
+# Summarize the model
+summary(model2)
+
+
+
+```
+
+
+```{r}
+# Ensure the 'Date' column is in Date format
+Gold_Prices$Date <- as.Date(Gold_Prices$Date)
+
+# Creating a zoo object with 'Date' as the index for the 'Log_Close' series
+library(zoo)
+log_close_zoo <- zoo(Gold_Prices$Log_Close, order.by = Gold_Prices$Date)
+
+# Fit the ARIMA model to the zoo object
+library(forecast)
+arima_model <- auto.arima(log_close_zoo)
+
+# Extract residuals from the model
+residuals <- residuals(arima_model)
+
+# Convert residuals to a zoo object to preserve the correct dates
+residuals_zoo <- zoo(residuals, order.by = index(log_close_zoo))
+
+# Plot residuals with the correct date alignment
+plot(residuals_zoo, main="ARIMA Residuals", xlab="Date", ylab="Residuals")
+
+
+```
+
+```{r}
+library(zoo)
+
+# Interpolate missing values
+residuals <- na.approx(residuals)
+
+```
+
+
+```{r}
+# Plot residuals
+plot(residuals, main = "Residuals of ARIMA Model", ylab = "Residuals", xlab = "Time")
+
+# Histogram
+hist(residuals, main = "Histogram of Residuals", xlab = "Residuals", breaks = 20)
+
+
+```
+```{r}
+# Ljung-Box test
+ljung_box_test <- Box.test(residuals_zoo, lag = 4, type = "Ljung-Box")
+print(ljung_box_test)
+
+
+```
+
+
+```{r}
+
+# Ljung-Box test for autocorrelation in residuals
+Box.test(residuals, lag = 2, type = "Ljung-Box")
+
+
+```
+
+```{r}
+# Assuming 'model' is your fitted ARIMA model and 'test_data' is your test dataset
+
+# Forecast the next values for the length of your test set
+forecast_values <- forecast(model, h = nrow(test_data))
+
+# Plot the forecasted values
+plot(forecast_values, main = "ARIMA Forecast vs Actual Log_Close", 
+     xlab = "Date", ylab = "Log_Close", col = "blue")
+
+# Add the actual values (Log_Close) to the plot
+lines(test_data$Date, test_data$Log_Close, col = "red", lwd = 2)
+
+# Add a legend to differentiate actual vs forecasted
+legend("topright", legend = c("Forecast", "Actual"), 
+       col = c("blue", "red"), lty = 1, lwd = 2)
+
+```
+
+
+## Seasonal Decomposition of Time Series (STL) + Forecasting
+```{r}
+stl_decomp <- stl(train_ts, s.window = "periodic")
+stl_forecast <- forecast(stl_decomp, h = length(test_data))
+plot(stl_forecast)
+summary(stl_forecast)
+```
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
