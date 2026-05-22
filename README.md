@@ -1,6 +1,6 @@
 # Developing a Forecasting Model for Gold Price
 
-![R](https://img.shields.io/badge/R-4.0+-blue) ![ARIMA](https://img.shields.io/badge/Model-ARIMA-orange) ![License](https://img.shields.io/badge/License-MIT-green)
+
 
 ## Overview
 
