@@ -12,10 +12,10 @@ Applied multiple ARIMA models to 5 years of daily gold price data to identify tr
 
 ## Key Results
 
-- 📈 Identified strong upward trend in gold prices over the 5-year period
-- 📅 Detected seasonal patterns using STL decomposition
-- 🏆 Best model selected via auto.ARIMA after comparing ARIMA(1,1,1) and ARIMA(1,2,1)
-- 📉 Negative correlation found between Spill Duration and Recovery Efficiency
+- Identified strong upward trend in gold prices over the 5-year period
+- Detected seasonal patterns using STL decomposition
+- Best model selected via auto.ARIMA after comparing ARIMA(1,1,1) and ARIMA(1,2,1)
+- Negative correlation found between Spill Duration and Recovery Efficiency
 
 ---
 
